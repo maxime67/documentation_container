@@ -41,7 +41,7 @@ docker pull nginx:latest
 docker pull nginx:1.21.6-alpine
 
 # Lister les images locales
-docker images
+docker image list
 
 # Voir les détails d'une image
 docker inspect nginx:latest
@@ -97,36 +97,13 @@ docker tag myapp:latest private-registry.com/myapp/api:v2.1
 docker push private-registry.com/myapp/api:v2.1
 ```
 
-### Exemple d'utilisation avec Docker Compose
-
-```yaml
-version: '3.8'
-services:
-  web:
-    image: nginx:1.21.6-alpine
-    ports:
-      - "80:80"
-    
-  database:
-    image: postgres:13.8-alpine
-    environment:
-      - POSTGRES_DB=myapp
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-    
-  cache:
-    image: redis:7-alpine
-    command: redis-server --appendonly yes
-```
-
 ### Meilleures pratiques pour les tags
 
 ```dockerfile
 # Dockerfile avec image de base spécifique
 FROM node:16.14.2-alpine3.15
 
-# Éviter 'latest' en production
-# ❌ Mauvais
+# ❌ Ne pas utiliser 'latest', ni en developpement ni en production 
 FROM node:latest
 
 # ✅ Bon

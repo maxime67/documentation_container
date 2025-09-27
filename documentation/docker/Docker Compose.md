@@ -42,7 +42,8 @@ services:
     # Ici on build un conteneur à partir de l'image du Dockerfile présent dans le même dossier
     build: ..
     ports:
-      - "8000:8000"
+    # On utilise une plage de port, pour permettre d'augmenter le nombre de conteneurs sans conflits de port
+      - "8080-8099:8000"
     # Ici on séquence les démarages des conteneurs
     depends_on:
       - db
@@ -58,7 +59,7 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
     volumes:
-      # On définit un volume docker pour conserver les données présentes dans '/var/lib/postgresql/data', répertoire par défaut des données de postgresql
+      # On mentionne un volume docker pour conserver les données présentes dans '/var/lib/postgresql/data', répertoire par défaut des données de postgresql
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
@@ -97,7 +98,7 @@ docker-compose ps
 docker-compose logs -f web
 
 # Exécuter une commande dans un service
-docker-compose exec web bash
+docker-compose exec web ping 8.8.8.8
 
 # Arrêter et supprimer
 docker-compose down
@@ -109,7 +110,7 @@ docker-compose up --scale web=3
 ### Fichiers d'override pour différents environnements
 
 ```yaml
-# docker-compose.override.yml (développement)
+# docker-compose.override.yml (développement). Sera utilisé automatiquement lors du 'docker-compose up -d'
 services:
   web:
     volumes:
@@ -117,7 +118,7 @@ services:
     environment:
       - DEBUG=true
 
-# docker-compose.prod.yml (production)
+# docker-compose.prod.yml (production). Doit être mentionné dans la commande: 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
 services:
   web:
     restart: always

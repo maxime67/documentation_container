@@ -61,7 +61,7 @@ docker run -e NODE_ENV=production node-app
 docker run -e NODE_ENV=production -e PORT=3000 node-app
 
 # Variable depuis l'hôte, doit être définie en variable d'environnement sur la machine hôte
-docker run -e USER node-app
+docker run -e USER=$USER node-app
 
 # Fichier de variables
 docker run --env-file .env node-app
@@ -139,10 +139,10 @@ docker run -e NODE_ENV=production -e PORT=8080 mon-app
 docker run -e API_SECRET=supersecret mon-app
 
 # ✅ Utiliser des fichiers secrets montés
-docker run -v /secure/api-key:/run/secrets/api-key:ro mon-app
+docker run -d -v ./secure/api-key:/run/secrets/api-key:ro nginx
 
 # ✅ Variables d'environnement pour configuration non sensible
-docker run -e LOG_LEVEL=info -e FEATURE_FLAG=enabled mon-app
+docker run -e LOG_LEVEL=info -e FEATURE_FLAG=enabled nginx
 ```
 
 ### Gestion des ressources
@@ -202,6 +202,9 @@ docker run --memory=100m --oom-kill-disable=false test-app
 
 ### Base de données avec persistance
 ```bash
+# Créer un password file en amont
+echo "ekrvnaklerbnlknrjkbn" >> ./secrets/db_password
+
 # PostgreSQL avec volume persistant
 docker run -d \
   --name postgres-db \
@@ -210,8 +213,11 @@ docker run -d \
   -e POSTGRES_DB=myapp \
   -e POSTGRES_USER=appuser \
   -e POSTGRES_PASSWORD_FILE=/run/secrets/db_password \
+  # Le volume mentionné ci-dessous sera crée à la volé
   -v postgres-data:/var/lib/postgresql/data \
-  -v /secrets/db_password:/run/secrets/db_password:ro \
+  # On utilise ici le fichier crée précédement pour ne pas mentionner de secret en clair
+  -v ./secrets/db_password:/run/secrets/db_password:ro \
+  # Seul la machine hôte aura accès au service
   -p 127.0.0.1:5432:5432 \
   postgres:13
 ```
